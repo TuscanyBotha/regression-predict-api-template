@@ -60,7 +60,9 @@ def _preprocess_data(data):
 
     # ----------- Replace this code with your own preprocessing steps --------
     df = predict_vector
-    
+    riders = pd.read_csv('assets/Riders.csv')
+    df = df.merge(riders,how='left', on='Rider Id')
+
     weekday_pickup = [1 if i < 6 else 0 for i in list(df['Pickup - Weekday (Mo = 1)'])]
     df['Weekday pickup'] = weekday_pickup
     
@@ -96,7 +98,7 @@ def _preprocess_data(data):
     average_speed = average_rider_speed['Average speed by trip'].sum()/len(average_rider_speed['Average speed by trip']) 
     df['Average speed by trip'].fillna(average_speed, inplace=True)
     
-    predict_vector = df[['Weekday pickup','Rush Hour Pickup','Average speed by trip']]
+    predict_vector = df
     # ------------------------------------------------------------------------
 
     return predict_vector
