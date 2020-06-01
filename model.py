@@ -89,7 +89,7 @@ def _preprocess_data(data):
         
     df['Rush Hour Pickup'] = rush_hour_pickup
     
-    average_rider_speed = pd.read_csv('average_rider_speed.csv')
+    average_rider_speed = pd.read_csv('assets/average_rider_speed.csv')
     df = df.merge(average_rider_speed,how='left', on='Rider Id')
     
     # fill in the blanks using the average of the average speeds
