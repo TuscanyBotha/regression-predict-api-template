@@ -96,7 +96,7 @@ def _preprocess_data(data):
     average_speed = average_rider_speed['Average speed by trip'].sum()/len(average_rider_speed['Average speed by trip']) 
     df['Average speed by trip'].fillna(average_speed, inplace=True)
     
-    predict_vector = df
+    predict_vector = df[['Weekday pickup','Rush Hour Pickup','Average speed by trip']]
     # ------------------------------------------------------------------------
 
     return predict_vector
