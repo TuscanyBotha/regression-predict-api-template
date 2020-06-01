@@ -48,7 +48,7 @@ def _preprocess_data(data):
     # Convert the json string to a python dictionary object
     feature_vector_dict = json.loads(data)
     # Load the dictionary as a Pandas DataFrame.
-    feature_vector_df = pd.DataFrame.from_dict([feature_vector_dict])
+    predict_vector = pd.DataFrame.from_dict([feature_vector_dict])
 
     # ---------------------------------------------------------------
     # NOTE: You will need to swap the lines below for your own data
@@ -59,8 +59,44 @@ def _preprocess_data(data):
     # ---------------------------------------------------------------
 
     # ----------- Replace this code with your own preprocessing steps --------
-    predict_vector = feature_vector_df[['Pickup Lat','Pickup Long',
-                                        'Destination Lat','Destination Long']]
+    df = predict_vector
+    
+    weekday_pickup = [1 if i < 6 else 0 for i in list(df['Pickup - Weekday (Mo = 1)'])]
+    df['Weekday pickup'] = weekday_pickup
+    
+    time_of_day = [i for i in df['Pickup - Time']]
+    rush_hour_pickup = []
+
+    for i in range(len(time_of_day)):
+
+        time = time_of_day[i]
+        index_of_first_colon = time.find(":") 
+        hours = int(time[:index_of_first_colon])
+        minutes = int(time[index_of_first_colon + 1:index_of_first_colon+3])
+
+        # if the day is a weekend, add a 0 to rush hour pickup list as there is no rush hour on a weekend. Else, classify as 
+        # rush hour (1) or non rush hour (0)
+        if weekday_pickup[i] == 0:
+            rush_hour = 0
+        elif 'AM' in time and hours in range(7,10):
+            rush_hour = 1
+        elif 'PM' in time and hours in range(4,7):
+            rush_hour = 1
+        else:
+            rush_hour = 0
+
+        rush_hour_pickup.append(rush_hour)
+        
+    df['Rush Hour Pickup'] = rush_hour_pickup
+    
+    average_rider_speed = pd.read_csv('average_rider_speed.csv')
+    df = df.merge(average_rider_speed,how='left', on='Rider Id')
+    
+    # fill in the blanks using the average of the average speeds
+    average_speed = average_rider_speed['Average speed by trip'].sum()/len(average_rider_speed['Average speed by trip']) 
+    df['Average speed by trip'].fillna(average_speed, inplace=True)
+    
+    predict_vector = df
     # ------------------------------------------------------------------------
 
     return predict_vector
